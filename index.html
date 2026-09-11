@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Cotizador Rápido Siglo 21 • Multisede</title>
+<title>Cotizador Rápido Siglo 21 • Multisede & Convenios</title>
 <style>
   * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
   body { background: #0f172a; color: #f8fafc; margin: 0; padding: 20px; }
@@ -31,8 +31,24 @@
   .section-label {
     font-size: 12px; font-weight: 800; color: #67e8f9; text-transform: uppercase;
     letter-spacing: 0.5px; margin: 4px 0 10px 0; padding-top: 12px; border-top: 1px dashed #334155;
+    display: flex; align-items: center; justify-content: space-between;
   }
   .section-label.first { border-top: none; padding-top: 0; }
+
+  /* Switch / Checkbox styling */
+  .switch-wrap {
+    display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: #fbbf24; text-transform: none; cursor: pointer;
+  }
+  .switch-wrap input[type="checkbox"] {
+    width: 16px; height: 16px; accent-color: #f59e0b; cursor: pointer;
+  }
+
+  .convenio-box {
+    background: #1e1b4b; border: 1.5px solid #4338ca; border-radius: 10px; padding: 14px; margin-bottom: 16px;
+    display: none; animation: fadeIn 0.2s ease-in-out;
+  }
+  .convenio-box.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
 
   .actions { display: flex; gap: 12px; margin: 18px 0; }
   .btn {
@@ -119,6 +135,18 @@
     font-size: 9.5pt;
     color: #92400e !important;
   }
+  .q-convenio-badge {
+    background: #eef2ff !important;
+    border: 1px solid #c7d2fe;
+    color: #3730a3 !important;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 9pt;
+    font-weight: 700;
+    margin-top: 6px;
+    display: inline-block;
+  }
+
   .q-section-title {
     font-size: 10.5pt;
     font-weight: 800;
@@ -166,7 +194,7 @@
 <div class="container">
   <div class="no-print">
     <h1>⚡ Cotizador Rápido • Siglo 21</h1>
-    <p class="sub">Pegá los valores calculados de la Wix, elegí la sede y generá el mensaje o PDF al instante.</p>
+    <p class="sub">Pegá los valores calculados de la Wix, elegí sede/convenio y generá el mensaje o PDF al instante.</p>
 
     <div class="section-label first">1. Datos del Ingresante y Sede</div>
     <div class="grid">
@@ -209,7 +237,42 @@
       </div>
     </div>
 
-    <div class="section-label">2. Valores Finales (copiados directo de la Wix)</div>
+    <!-- SECCIÓN CONVENIOS / BENEFICIOS ESPECIALES -->
+    <div class="section-label">
+      <span>2. Convenio / Beneficio Especial</span>
+      <label class="switch-wrap">
+        <input type="checkbox" id="checkConvenio" onchange="toggleConvenio()">
+        ¿Aplica Convenio Institucional?
+      </label>
+    </div>
+
+    <div class="convenio-box" id="convenioBox">
+      <div class="grid" style="margin-bottom: 0;">
+        <div class="field">
+          <label>Tipo de Convenio</label>
+          <select id="tipoConvenioSelect" onchange="cambiarTipoConvenio()">
+            <option value="Empresa Amiga">Empresa Amiga / Corporativo</option>
+            <option value="OSDE / Prepaga">Prepaga / Obra Social (OSDE, Swiss Medical, etc.)</option>
+            <option value="Monotributo">Monotributo / Emprendedores</option>
+            <option value="Fuerzas de Seguridad">Fuerzas Armadas / Seguridad</option>
+            <option value="Colegio Profesional">Colegio Profesional / Graduados</option>
+            <option value="Otro">Otro (personalizado)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Institución / Entidad Específica</label>
+          <input type="text" id="nombreConvenio" value="OSDE" placeholder="Ej: OSDE, Edenor, Policía, etc.">
+        </div>
+
+        <div class="field">
+          <label>% Bonificación Convenio (Materias)</label>
+          <input type="number" id="pctConvenio" value="10" step="1">
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">3. Valores Finales (calculados por Wix ya con la promo y convenio)</div>
     <div class="grid">
       <div class="field" id="wrap-cuota6">
         <label style="color: #34d399;">6 Cuotas Fijas ($)</label>
@@ -225,14 +288,14 @@
       </div>
     </div>
 
-    <div class="section-label">3. Porcentajes de la Promo (a la vista en Wix)</div>
+    <div class="section-label">4. Porcentajes Informativos de la Promo</div>
     <div class="grid">
       <div class="field">
         <label>% Matrícula</label>
         <input type="number" id="pctMatricula" value="20" step="1">
       </div>
       <div class="field">
-        <label>% Materias</label>
+        <label>% Materias Promo General</label>
         <input type="number" id="pctMaterias" value="20" step="1">
       </div>
       <div class="field">
@@ -271,6 +334,9 @@
 
       <div class="q-alert">
         ⏳ <strong>Promoción Arancelaria:</strong> <span id="pdfPromoPct">20% OFF matrícula + 20% OFF materias</span> — vigente hasta el <strong id="pdfFechaAlert">11/09/2026</strong> inclusive.
+        <div id="pdfConvenioBadgeWrap" style="display: none;">
+          <div class="q-convenio-badge" id="pdfConvenioBadge">⭐ Convenio Aplicado: OSDE (10% en materias)</div>
+        </div>
       </div>
 
       <div class="q-section-title">Datos Académicos del Ingresante</div>
@@ -287,6 +353,10 @@
           <td class="q-meta-label">Sede / Centro:</td>
           <td class="q-meta-val" id="pdfSedeLabel">CAU Moreno</td>
         </tr>
+        <tr id="pdfConvenioRow" style="display: none;">
+          <td class="q-meta-label">Convenio Institucional:</td>
+          <td class="q-meta-val" colspan="3" id="pdfConvenioDetalle" style="color: #4338ca;">Afiliación Activa OSDE — Bonificación Arancelaria en Cursada</td>
+        </tr>
       </table>
 
       <div class="q-section-title">Propuesta de Inversión Arancelaria</div>
@@ -294,7 +364,7 @@
         <div class="q-card highlight">
           <span class="q-card-badge green">MÁS ELEGIDA • EN CUOTAS</span>
           <div class="q-card-heading">Tarjeta de Crédito (Visa / Master)</div>
-          <div class="q-card-sub">Financiación bancarizada · <span id="pdfPctMateriasTxt">20%</span> OFF ya aplicado</div>
+          <div class="q-card-sub">Financiación bancarizada · Descuentos de cursada ya aplicados</div>
 
           <div class="q-price-block">
             <div class="q-price-label" id="pdfPrice1Label">6 CUOTAS FIJAS DE</div>
@@ -382,6 +452,25 @@
     }
   }
 
+  function toggleConvenio() {
+    const checked = document.getElementById('checkConvenio').checked;
+    const box = document.getElementById('convenioBox');
+    box.classList.toggle('active', checked);
+    update();
+  }
+
+  function cambiarTipoConvenio() {
+    const sel = document.getElementById('tipoConvenioSelect').value;
+    const inputNombre = document.getElementById('nombreConvenio');
+    if (sel === 'OSDE / Prepaga') inputNombre.value = 'OSDE';
+    else if (sel === 'Monotributo') inputNombre.value = 'Régimen Monotributo';
+    else if (sel === 'Fuerzas de Seguridad') inputNombre.value = 'Fuerza de Seguridad / FFAA';
+    else if (sel === 'Colegio Profesional') inputNombre.value = 'Colegio Profesional';
+    else if (sel === 'Empresa Amiga') inputNombre.value = 'Empresa Amiga';
+    else inputNombre.value = '';
+    update();
+  }
+
   function cleanNum(val) {
     if (!val) return '';
     let clean = val.replace(/[^\d]/g, '');
@@ -424,28 +513,38 @@
     const cuota3Val = document.getElementById('cuota3').value.trim();
     const totalVal = document.getElementById('total').value.trim();
 
+    const tieneConvenio = document.getElementById('checkConvenio').checked;
+    const nombreConv = document.getElementById('nombreConvenio').value.trim() || 'Institucional';
+    const pctConv = document.getElementById('pctConvenio').value || '0';
+
     const materiasTxt = calcularMateriasTexto(p, tipo);
 
-    // Mensaje WhatsApp
+    // Bloque cuotas
     let cuotasMsg = '';
+    const descConvenioTxt = tieneConvenio ? ` + beneficio ${nombreConv}` : '';
     if (!es2B) {
       cuotasMsg = `💳 *OPCIÓN FINANCIADA (Visa / Master bancarizada)*
 👉 *6 cuotas fijas de: $${cuota6Val}*
 • O bien en 3 cuotas fijas de: *$${cuota3Val}*
-_(Ya incluye el ${pctMatr}% OFF de la promo)_`;
+_(Ya incluye promo ${pctMatr}% OFF${descConvenioTxt})_`;
     } else {
       cuotasMsg = `💳 *OPCIÓN FINANCIADA (Visa / Master bancarizada)*
 👉 *3 cuotas fijas de: $${cuota3Val}*
-_(Ya incluye el ${pctMatr}% OFF de la promo)_`;
+_(Ya incluye promo ${pctMatr}% OFF${descConvenioTxt})_`;
     }
 
     const sedeTextoMsg = sedeKey === 'Virtual' ? 'CAU Virtual' : sedeCfg.nombre;
+
+    let lineaConvenioMsg = '';
+    if (tieneConvenio) {
+      lineaConvenioMsg = `⭐ *Convenio Aplicado:* ${nombreConv} (${pctConv}% bonificación en materias)\n`;
+    }
 
     const msg = `🎓 *PROPUESTA ARANCELARIA | PERÍODO ${p}*
 *Carrera:* ${carrera} (${tipo} - ${sedeTextoMsg})
 ────────────────────────
 🔥 *PROMO ACTIVA: ${pctMat}% OFF matrícula + ${pctMatr}% OFF materias*
-⏳ *Vence el ${fecha} — no se extiende*
+${lineaConvenioMsg}⏳ *Vence el ${fecha} — no se extiende*
 
 ${cuotasMsg}
 
@@ -475,10 +574,19 @@ _(Promo + ${pctPago1}% adicional por pago contado)_
     document.getElementById('pdfCarrera').innerText = carrera;
     document.getElementById('pdfTipo').innerText = tipo;
     document.getElementById('pdfPeriodo').innerText = p;
-    document.getElementById('pdfPctMateriasTxt').innerText = pctMatr + '%';
     document.getElementById('pdfDesc1PagoTxt').innerText = pctPago1 + '% extra';
     document.getElementById('pdfTotal').innerText = '$ ' + totalVal;
     document.getElementById('pdfMateriasDesc').innerText = materiasTxt;
+
+    if (tieneConvenio) {
+      document.getElementById('pdfConvenioBadgeWrap').style.display = 'block';
+      document.getElementById('pdfConvenioBadge').innerText = `⭐ Convenio Aplicado: ${nombreConv} (${pctConv}% bonif. en cursada)`;
+      document.getElementById('pdfConvenioRow').style.display = 'table-row';
+      document.getElementById('pdfConvenioDetalle').innerText = `${nombreConv} — Bonificación arancelaria del ${pctConv}% aplicada sobre Ticket A y B.`;
+    } else {
+      document.getElementById('pdfConvenioBadgeWrap').style.display = 'none';
+      document.getElementById('pdfConvenioRow').style.display = 'none';
+    }
 
     if (!es2B) {
       document.getElementById('pdfPrice1Label').innerText = '6 CUOTAS FIJAS DE';
@@ -492,7 +600,7 @@ _(Promo + ${pctPago1}% adicional por pago contado)_
     }
   }
 
-  // Formato automático de separadores de miles
+  // Event Listeners
   ['cuota6', 'cuota3', 'total'].forEach(id => {
     const el = document.getElementById(id);
     el.addEventListener('blur', () => {
@@ -502,7 +610,10 @@ _(Promo + ${pctPago1}% adicional por pago contado)_
     el.addEventListener('input', update);
   });
 
-  ['carrera', 'fecha', 'pctMatricula', 'pctMaterias', 'pctDesc1Pago'].forEach(id => {
+  [
+    'carrera', 'fecha', 'pctMatricula', 'pctMaterias', 'pctDesc1Pago',
+    'nombreConvenio', 'pctConvenio'
+  ].forEach(id => {
     document.getElementById(id).addEventListener('input', update);
   });
 
