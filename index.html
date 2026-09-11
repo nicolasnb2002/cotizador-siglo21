@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Cotizador Rápido Siglo 21 • Multisede</title>
+<style>
+  * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
+  body { background: #0f172a; color: #f8fafc; margin: 0; padding: 20px; }
+  .container { width: 100%; max-width: 980px; margin: 0 auto; background: #1e293b; border-radius: 14px; padding: 24px; box-shadow: 0 8px 30px rgba(0,0,0,0.4); }
+  
+  h1 { font-size: 19px; color: #34d399; margin: 0 0 4px 0; display: flex; align-items: center; gap: 8px; }
+  p.sub { font-size: 13px; color: #94a3b8; margin: 0 0 18px 0; }
+  
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+  @media (max-width: 768px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  label { font-size: 11.5px; font-weight: 700; color: #cbd5e1; text-transform: uppercase; letter-spacing: 0.5px; }
+  input, select {
+    background: #0f172a; border: 1.5px solid #334155; color: #fff; padding: 10px 12px; border-radius: 8px; font-size: 13.5px; outline: none; transition: 0.2s;
+  }
+  input:focus, select:focus { border-color: #10b981; }
+
+  .section-label {
+    font-size: 12px; font-weight: 800; color: #67e8f9; text-transform: uppercase;
+    letter-spacing: 0.5px; margin: 4px 0 10px 0; padding-top: 12px; border-top: 1px dashed #334155;
+  }
+  .section-label.first { border-top: none; padding-top: 0; }
+
+  .actions { display: flex; gap: 12px; margin: 18px 0; }
+  .btn {
+    padding: 13px 18px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s;
+  }
+  .btn-green { background: #10b981; color: #fff; flex: 1.4; justify-content: center; }
+  .btn-green:hover { background: #059669; }
+  .btn-blue { background: #0284c7; color: #fff; flex: 1; justify-content: center; }
+  .btn-blue:hover { background: #0369a1; }
+
+  .preview-box {
+    background: #0b1329; border: 1px solid #334155; border-radius: 10px; padding: 16px 20px;
+  }
+  .preview-header { font-size: 11.5px; color: #64748b; font-weight: 700; margin-bottom: 10px; text-transform: uppercase; }
+  pre {
+    margin: 0; white-space: pre-wrap; font-family: inherit; font-size: 13.5px; color: #e2e8f0; line-height: 1.6;
+  }
+  #fechaWarning { display: none; font-size: 11.5px; color: #fca5a5; margin-top: 4px; }
+  #fechaWarning.show { display: block; }
+
+  /* IMPRESIÓN / PDF EN 1 PÁGINA A4 */
+  #printable-quote { display: none; }
+
+  @media print {
+    @page { size: A4 portrait; margin: 10mm 12mm; }
+    html, body {
+      background: #ffffff !important;
+      color: #0f172a !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      font-size: 10pt;
+    }
+    .no-print { display: none !important; }
+    .container {
+      max-width: 100% !important;
+      width: 100% !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+    #printable-quote { display: block !important; }
+  }
+
+  .quote-sheet {
+    background: #ffffff;
+    border: 2px solid #0f766e;
+    border-radius: 12px;
+    padding: 24px;
+    color: #1e293b;
+    box-sizing: border-box;
+  }
+  .q-header {
+    background-color: #044e45 !important;
+    color: #ffffff !important;
+    padding: 16px 20px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    display: table;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .q-title-left { display: table-cell; vertical-align: middle; }
+  .q-title-right { display: table-cell; vertical-align: middle; text-align: right; }
+  .q-h1 { font-size: 16pt; font-weight: 800; margin: 0; color: #ffffff !important; }
+  .q-h2 { font-size: 10pt; color: #a7f3d0 !important; margin: 2px 0 0 0; }
+  .q-tag {
+    background: rgba(255,255,255,0.2) !important;
+    color: #ffffff !important;
+    padding: 4px 12px;
+    border-radius: 14px;
+    font-size: 8.5pt;
+    font-weight: bold;
+    display: inline-block;
+  }
+  .q-alert {
+    background-color: #fffbeb !important;
+    border-left: 4px solid #f59e0b;
+    padding: 10px 14px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+    font-size: 9.5pt;
+    color: #92400e !important;
+  }
+  .q-section-title {
+    font-size: 10.5pt;
+    font-weight: 800;
+    color: #044e45;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 8px 0;
+    border-bottom: 1.5px solid #e2e8f0;
+    padding-bottom: 4px;
+  }
+  .q-meta-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+  .q-meta-table td { padding: 6px 8px; font-size: 9.5pt; border-bottom: 1px solid #f1f5f9; }
+  .q-meta-label { color: #64748b; font-weight: 600; width: 25%; }
+  .q-meta-val { color: #0f172a; font-weight: 700; }
+  .q-pricing { display: table; width: 100%; margin-bottom: 18px; table-layout: fixed; }
+  .q-card {
+    display: table-cell; width: 48%; border: 1.5px solid #cbd5e1; border-radius: 8px;
+    padding: 14px; vertical-align: top; background-color: #f8fafc !important; box-sizing: border-box;
+  }
+  .q-card.highlight { border-color: #059669; background-color: #f0fdf4 !important; }
+  .q-gap { display: table-cell; width: 4%; }
+  .q-card-badge {
+    font-size: 8pt; font-weight: 800; padding: 2px 8px; border-radius: 4px; display: inline-block;
+    margin-bottom: 6px; text-transform: uppercase;
+  }
+  .q-card-badge.green { background: #dcfce7 !important; color: #166534 !important; }
+  .q-card-badge.blue { background: #e0f2fe !important; color: #075985 !important; }
+  .q-card-heading { font-size: 11pt; font-weight: 700; color: #0f172a; margin-bottom: 2px; }
+  .q-card-sub { font-size: 8.5pt; color: #64748b; margin-bottom: 8px; }
+  .q-price-block { background: #ffffff !important; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px; margin: 8px 0; }
+  .q-price-label { font-size: 8pt; color: #64748b; font-weight: 700; text-transform: uppercase; }
+  .q-price-num { font-size: 16pt; font-weight: 800; color: #044e45; margin-top: 2px; }
+  .q-price-alt { font-size: 8.5pt; color: #334155; margin-top: 4px; font-weight: 600; }
+  .q-features {
+    background-color: #f8fafc !important; border: 1px solid #e2e8f0; border-radius: 8px;
+    padding: 12px 16px; margin-bottom: 16px;
+  }
+  .q-features ul { margin: 4px 0 0 0; padding-left: 18px; font-size: 9pt; color: #334155; }
+  .q-features li { margin-bottom: 4px; }
+  .q-footer { text-align: center; font-size: 8pt; color: #64748b; border-top: 1px solid #e2e8f0; padding-top: 8px; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="no-print">
+    <h1>⚡ Cotizador Rápido • Siglo 21</h1>
+    <p class="sub">Pegá los valores calculados de la Wix, elegí la sede y generá el mensaje o PDF al instante.</p>
+
+    <div class="section-label first">1. Datos del Ingresante y Sede</div>
+    <div class="grid">
+      <div class="field">
+        <label>Sede / CAU</label>
+        <select id="sede" onchange="update()">
+          <option value="Moreno">CAU Moreno</option>
+          <option value="Merlo">CAU Merlo</option>
+          <option value="Marcos Paz">CAU Marcos Paz</option>
+          <option value="Ituzaingó">CAU Ituzaingó</option>
+          <option value="Virtual">CAU Virtual (100% a distancia)</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Período de Ingreso</label>
+        <select id="periodo" onchange="cambiarPeriodo()">
+          <option value="1 A 2027">1 A 2027 (Ingresantes 2027) [6 y 3 Cuotas]</option>
+          <option value="2 B 2026">2 B 2026 (Ingresantes 2026) [Solo 3 Cuotas]</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Tipo de Carrera</label>
+        <select id="tipoCarrera" onchange="update()">
+          <option value="Grado">Grado (Abogacía, Licenciaturas, Contador)</option>
+          <option value="Pregrado">Pregrado (Tecnicaturas)</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Carrera</label>
+        <input type="text" id="carrera" value="Abogacía" placeholder="Ej: Abogacía, Contador...">
+      </div>
+
+      <div class="field">
+        <label>Promoción Vigente Hasta</label>
+        <input type="text" id="fecha" value="11/09/2026" placeholder="DD/MM/AAAA">
+        <span id="fechaWarning">⚠️ Esta fecha ya pasó — actualizala antes de enviar</span>
+      </div>
+    </div>
+
+    <div class="section-label">2. Valores Finales (copiados directo de la Wix)</div>
+    <div class="grid">
+      <div class="field" id="wrap-cuota6">
+        <label style="color: #34d399;">6 Cuotas Fijas ($)</label>
+        <input type="text" id="cuota6" value="369.238">
+      </div>
+      <div class="field" id="wrap-cuota3">
+        <label id="lblCuota3" style="color: #38bdf8;">3 Cuotas Fijas ($)</label>
+        <input type="text" id="cuota3" value="753.245">
+      </div>
+      <div class="field">
+        <label style="color: #f59e0b;">💵 Total Pago Único / Contado ($)</label>
+        <input type="text" id="total" value="2.104.655">
+      </div>
+    </div>
+
+    <div class="section-label">3. Porcentajes de la Promo (a la vista en Wix)</div>
+    <div class="grid">
+      <div class="field">
+        <label>% Matrícula</label>
+        <input type="number" id="pctMatricula" value="20" step="1">
+      </div>
+      <div class="field">
+        <label>% Materias</label>
+        <input type="number" id="pctMaterias" value="20" step="1">
+      </div>
+      <div class="field">
+        <label>% Extra Contado</label>
+        <input type="number" id="pctDesc1Pago" value="5" step="1">
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-green" id="btnCopy" onclick="copiarMensaje()">
+        📋 COPIAR MENSAJE PARA KOMMO
+      </button>
+      <button class="btn btn-blue" onclick="window.print()">
+        📄 DESCARGAR PRESUPUESTO EN PDF
+      </button>
+    </div>
+
+    <div class="preview-box">
+      <div class="preview-header">Vista Previa WhatsApp / Kommo</div>
+      <pre id="previewText"></pre>
+    </div>
+  </div>
+
+  <!-- HOJA PDF OFICIAL -->
+  <div id="printable-quote">
+    <div class="quote-sheet">
+      <div class="q-header">
+        <div class="q-title-left">
+          <div class="q-h1">UNIVERSIDAD SIGLO 21</div>
+          <div class="q-h2" id="pdfHeaderSede">Centro de Aprendizaje Universitario Moreno</div>
+        </div>
+        <div class="q-title-right">
+          <span class="q-tag">PROPUESTA OFICIAL</span>
+        </div>
+      </div>
+
+      <div class="q-alert">
+        ⏳ <strong>Promoción Arancelaria:</strong> <span id="pdfPromoPct">20% OFF matrícula + 20% OFF materias</span> — vigente hasta el <strong id="pdfFechaAlert">11/09/2026</strong> inclusive.
+      </div>
+
+      <div class="q-section-title">Datos Académicos del Ingresante</div>
+      <table class="q-meta-table">
+        <tr>
+          <td class="q-meta-label">Carrera:</td>
+          <td class="q-meta-val"><span id="pdfCarrera">Abogacía</span> (<span id="pdfTipo">Grado</span>)</td>
+          <td class="q-meta-label">Modalidad:</td>
+          <td class="q-meta-val" id="pdfModalidad">Distribuida / A Distancia</td>
+        </tr>
+        <tr>
+          <td class="q-meta-label">Período:</td>
+          <td class="q-meta-val" id="pdfPeriodo">1 A 2027</td>
+          <td class="q-meta-label">Sede / Centro:</td>
+          <td class="q-meta-val" id="pdfSedeLabel">CAU Moreno</td>
+        </tr>
+      </table>
+
+      <div class="q-section-title">Propuesta de Inversión Arancelaria</div>
+      <div class="q-pricing">
+        <div class="q-card highlight">
+          <span class="q-card-badge green">MÁS ELEGIDA • EN CUOTAS</span>
+          <div class="q-card-heading">Tarjeta de Crédito (Visa / Master)</div>
+          <div class="q-card-sub">Financiación bancarizada · <span id="pdfPctMateriasTxt">20%</span> OFF ya aplicado</div>
+
+          <div class="q-price-block">
+            <div class="q-price-label" id="pdfPrice1Label">6 CUOTAS FIJAS DE</div>
+            <div class="q-price-num" id="pdfPrice1Val">$ 369.238</div>
+          </div>
+          <div class="q-price-alt" id="pdfPrice2Alt">O bien en 3 cuotas fijas de: <strong>$ 753.245</strong></div>
+        </div>
+
+        <div class="q-gap"></div>
+
+        <div class="q-card">
+          <span class="q-card-badge blue">DESCUENTO ADICIONAL</span>
+          <div class="q-card-heading">Pago Único (Efectivo / Débito)</div>
+          <div class="q-card-sub">Transferencia o 1 pago</div>
+
+          <div class="q-price-block">
+            <div class="q-price-label">TOTAL PERÍODO COMPLETO</div>
+            <div class="q-price-num" id="pdfTotal">$ 2.104.655</div>
+          </div>
+          <div class="q-price-alt" style="color: #0369a1;">Aplica <span id="pdfDesc1PagoTxt">5% extra</span> por pago al contado</div>
+        </div>
+      </div>
+
+      <div class="q-features">
+        <div style="font-size: 9.5pt; font-weight: 700; color: #0f172a; margin-bottom: 4px;">Tu arancel incluye:</div>
+        <ul>
+          <li><strong>Cursada académica:</strong> <span id="pdfMateriasDesc">6 materias correspondientes al cuatrimestre</span> sin cargos ocultos.</li>
+          <li><strong>Campus Virtual Canvas 24/7:</strong> Clases grabadas, teleclases y soporte docente permanente.</li>
+          <li><strong>Material bibliográfico 100% digital:</strong> Textos, casos prácticos y recursos de estudio incluidos.</li>
+          <li><strong>Acompañamiento tutorial:</strong> <span id="pdfAcompTxt">Atención presencial y mesas de examen en CAU Moreno.</span></li>
+        </ul>
+      </div>
+
+      <div class="q-footer" id="pdfFooter">
+        Centro de Aprendizaje Universitario Moreno • Documento arancelario informativo sujeto a disponibilidad de cupos institucionales.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function getSedeConfig(s) {
+    switch (s) {
+      case 'Merlo':
+        return {
+          nombre: 'CAU Merlo',
+          subHeader: 'Centro de Aprendizaje Universitario Merlo',
+          modalidad: 'Distribuida / A Distancia',
+          acompanamiento: 'Atención presencial, seguimiento tutorial y exámenes en CAU Merlo.',
+          footer: 'Centro de Aprendizaje Universitario Merlo • Documento informativo sujeto a cupos.'
+        };
+      case 'Marcos Paz':
+        return {
+          nombre: 'CAU Marcos Paz',
+          subHeader: 'Centro de Aprendizaje Universitario Marcos Paz',
+          modalidad: 'Distribuida / A Distancia',
+          acompanamiento: 'Atención presencial, seguimiento tutorial y exámenes en CAU Marcos Paz.',
+          footer: 'Centro de Aprendizaje Universitario Marcos Paz • Documento informativo sujeto a cupos.'
+        };
+      case 'Ituzaingó':
+        return {
+          nombre: 'CAU Ituzaingó',
+          subHeader: 'Centro de Aprendizaje Universitario Ituzaingó',
+          modalidad: 'Distribuida / A Distancia',
+          acompanamiento: 'Atención presencial, seguimiento tutorial y exámenes en CAU Ituzaingó.',
+          footer: 'Centro de Aprendizaje Universitario Ituzaingó • Documento informativo sujeto a cupos.'
+        };
+      case 'Virtual':
+        return {
+          nombre: 'CAU Virtual (100% Online)',
+          subHeader: 'Centro de Aprendizaje Universitario • Modalidad Virtual Directa',
+          modalidad: '100% Online / A Distancia',
+          acompanamiento: 'Gestión académica, exámenes virtuales y soporte tutorial remoto permanente.',
+          footer: 'Universidad Siglo 21 • CAU Virtual • Documento informativo sujeto a cupos.'
+        };
+      case 'Moreno':
+      default:
+        return {
+          nombre: 'CAU Moreno',
+          subHeader: 'Centro de Aprendizaje Universitario Moreno (MRO01)',
+          modalidad: 'Distribuida / A Distancia',
+          acompanamiento: 'Atención presencial, seguimiento tutorial y exámenes en CAU Moreno.',
+          footer: 'Centro de Aprendizaje Universitario Moreno • Documento informativo sujeto a cupos.'
+        };
+    }
+  }
+
+  function cleanNum(val) {
+    if (!val) return '';
+    let clean = val.replace(/[^\d]/g, '');
+    if (!clean) return '';
+    return Number(clean).toLocaleString('es-AR');
+  }
+
+  function cambiarPeriodo() {
+    const p = document.getElementById('periodo').value;
+    const es2B = p.includes('2 B');
+    document.getElementById('wrap-cuota6').style.display = es2B ? 'none' : 'flex';
+    const lbl3 = document.getElementById('lblCuota3');
+    lbl3.innerText = es2B ? '3 Cuotas Fijas ($) [Opción Principal]' : '3 Cuotas Fijas ($) [Opcional]';
+    update();
+  }
+
+  function calcularMateriasTexto(periodo, tipo) {
+    if (periodo.includes('1 A')) {
+      return tipo === 'Grado' ? '6 materias del cuatrimestre' : '4 materias del cuatrimestre';
+    } else {
+      return tipo === 'Grado' ? '3 materias del ciclo' : '2 materias del ciclo';
+    }
+  }
+
+  function update() {
+    const p = document.getElementById('periodo').value;
+    const es2B = p.includes('2 B');
+    const sedeKey = document.getElementById('sede').value;
+    const sedeCfg = getSedeConfig(sedeKey);
+
+    const tipo = document.getElementById('tipoCarrera').value;
+    const carrera = document.getElementById('carrera').value.trim() || 'la carrera elegida';
+    const fecha = document.getElementById('fecha').value.trim() || 'cierre de ciclo';
+
+    const pctMat = document.getElementById('pctMatricula').value || '0';
+    const pctMatr = document.getElementById('pctMaterias').value || '0';
+    const pctPago1 = document.getElementById('pctDesc1Pago').value || '0';
+
+    const cuota6Val = document.getElementById('cuota6').value.trim();
+    const cuota3Val = document.getElementById('cuota3').value.trim();
+    const totalVal = document.getElementById('total').value.trim();
+
+    const materiasTxt = calcularMateriasTexto(p, tipo);
+
+    // Mensaje WhatsApp
+    let cuotasMsg = '';
+    if (!es2B) {
+      cuotasMsg = `💳 *OPCIÓN FINANCIADA (Visa / Master bancarizada)*
+👉 *6 cuotas fijas de: $${cuota6Val}*
+• O bien en 3 cuotas fijas de: *$${cuota3Val}*
+_(Ya incluye el ${pctMatr}% OFF de la promo)_`;
+    } else {
+      cuotasMsg = `💳 *OPCIÓN FINANCIADA (Visa / Master bancarizada)*
+👉 *3 cuotas fijas de: $${cuota3Val}*
+_(Ya incluye el ${pctMatr}% OFF de la promo)_`;
+    }
+
+    const sedeTextoMsg = sedeKey === 'Virtual' ? 'CAU Virtual' : sedeCfg.nombre;
+
+    const msg = `🎓 *PROPUESTA ARANCELARIA | PERÍODO ${p}*
+*Carrera:* ${carrera} (${tipo} - ${sedeTextoMsg})
+────────────────────────
+🔥 *PROMO ACTIVA: ${pctMat}% OFF matrícula + ${pctMatr}% OFF materias*
+⏳ *Vence el ${fecha} — no se extiende*
+
+${cuotasMsg}
+
+💵 *PAGO ÚNICO (Efectivo / Débito)*
+• Total: *$${totalVal}*
+_(Promo + ${pctPago1}% adicional por pago contado)_
+
+────────────────────────
+✅ *Tu inscripción incluye:*
+• Cursada de ${materiasTxt}
+• Plataforma virtual 24/7 y material digital completo
+• ${sedeCfg.acompanamiento}
+
+¿Querés que reservemos tu vacante con esta bonificación?`;
+
+    document.getElementById('previewText').innerText = msg;
+
+    // Sincronizar PDF
+    document.getElementById('pdfHeaderSede').innerText = sedeCfg.subHeader;
+    document.getElementById('pdfSedeLabel').innerText = sedeCfg.nombre;
+    document.getElementById('pdfModalidad').innerText = sedeCfg.modalidad;
+    document.getElementById('pdfAcompTxt').innerText = sedeCfg.acompanamiento;
+    document.getElementById('pdfFooter').innerText = sedeCfg.footer;
+
+    document.getElementById('pdfFechaAlert').innerText = fecha + ' inclusive';
+    document.getElementById('pdfPromoPct').innerText = `${pctMat}% OFF matrícula + ${pctMatr}% OFF materias`;
+    document.getElementById('pdfCarrera').innerText = carrera;
+    document.getElementById('pdfTipo').innerText = tipo;
+    document.getElementById('pdfPeriodo').innerText = p;
+    document.getElementById('pdfPctMateriasTxt').innerText = pctMatr + '%';
+    document.getElementById('pdfDesc1PagoTxt').innerText = pctPago1 + '% extra';
+    document.getElementById('pdfTotal').innerText = '$ ' + totalVal;
+    document.getElementById('pdfMateriasDesc').innerText = materiasTxt;
+
+    if (!es2B) {
+      document.getElementById('pdfPrice1Label').innerText = '6 CUOTAS FIJAS DE';
+      document.getElementById('pdfPrice1Val').innerText = '$ ' + cuota6Val;
+      document.getElementById('pdfPrice2Alt').style.display = 'block';
+      document.getElementById('pdfPrice2Alt').innerHTML = `O bien en 3 cuotas fijas de: <strong>$ ${cuota3Val}</strong>`;
+    } else {
+      document.getElementById('pdfPrice1Label').innerText = '3 CUOTAS FIJAS DE';
+      document.getElementById('pdfPrice1Val').innerText = '$ ' + cuota3Val;
+      document.getElementById('pdfPrice2Alt').style.display = 'none';
+    }
+  }
+
+  // Formato automático de separadores de miles
+  ['cuota6', 'cuota3', 'total'].forEach(id => {
+    const el = document.getElementById(id);
+    el.addEventListener('blur', () => {
+      el.value = cleanNum(el.value);
+      update();
+    });
+    el.addEventListener('input', update);
+  });
+
+  ['carrera', 'fecha', 'pctMatricula', 'pctMaterias', 'pctDesc1Pago'].forEach(id => {
+    document.getElementById(id).addEventListener('input', update);
+  });
+
+  document.getElementById('fecha').addEventListener('input', () => {
+    const raw = document.getElementById('fecha').value.trim();
+    const warn = document.getElementById('fechaWarning');
+    const m = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (!m) { warn.classList.remove('show'); return; }
+    const [, d, mo, y] = m;
+    const fechaLimite = new Date(Number(y), Number(mo) - 1, Number(d), 23, 59, 59);
+    warn.classList.toggle('show', fechaLimite < new Date());
+  });
+
+  function copiarMensaje() {
+    const txt = document.getElementById('previewText').innerText;
+    const btn = document.getElementById('btnCopy');
+    navigator.clipboard.writeText(txt).then(() => {
+      btn.innerText = '✅ ¡COPIADO AL PORTAPAPELES!';
+      btn.style.background = '#059669';
+      setTimeout(() => {
+        btn.innerText = '📋 COPIAR MENSAJE PARA KOMMO';
+        btn.style.background = '#10b981';
+      }, 2200);
+    });
+  }
+
+  update();
+</script>
+
+</body>
+</html>
