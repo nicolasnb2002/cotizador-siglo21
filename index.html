@@ -365,7 +365,7 @@
 
       <div class="q-section-title">Propuesta de Inversión Arancelaria</div>
       <div class="q-pricing">
-        <div class="q-card highlight">
+        <div class="q-card highlight" style="width: 100%;">
           <span class="q-card-badge green">MÁS ELEGIDA • EN CUOTAS</span>
           <div class="q-card-heading">Tarjeta de Crédito (Visa / Master)</div>
           <div class="q-card-sub">Financiación bancarizada · Descuentos de cursada ya aplicados</div>
@@ -375,20 +375,6 @@
             <div class="q-price-num" id="pdfPrice1Val">$ 369.238</div>
           </div>
           <div class="q-price-alt" id="pdfPrice2Alt">O bien en 3 cuotas fijas de: <strong>$ 753.245</strong></div>
-        </div>
-
-        <div class="q-gap"></div>
-
-        <div class="q-card">
-          <span class="q-card-badge blue">DESCUENTO ADICIONAL</span>
-          <div class="q-card-heading">Pago Único (Efectivo / Débito)</div>
-          <div class="q-card-sub">Transferencia o 1 pago</div>
-
-          <div class="q-price-block">
-            <div class="q-price-label">TOTAL PERÍODO COMPLETO</div>
-            <div class="q-price-num" id="pdfTotal">$ 2.104.655</div>
-          </div>
-          <div class="q-price-alt" style="color: #0369a1;">Aplica <span id="pdfDesc1PagoTxt">5% extra</span> por pago al contado</div>
         </div>
       </div>
 
@@ -555,10 +541,6 @@ ${lineaConvenioMsg}⏳ *Vence el ${fecha} — no se extiende*
 
 ${cuotasMsg}
 
-💵 *PAGO ÚNICO (Efectivo / Débito)*
-• Total: *$${totalVal}*
-_(Promo + ${pctPago1}% adicional por pago contado)_
-
 ────────────────────────
 ✅ *Tu inscripción incluye:*
 • Cursada de ${materiasTxt}
@@ -581,8 +563,6 @@ _(Promo + ${pctPago1}% adicional por pago contado)_
     document.getElementById('pdfCarrera').innerText = carrera;
     document.getElementById('pdfTipo').innerText = tipo;
     document.getElementById('pdfPeriodo').innerText = p;
-    document.getElementById('pdfDesc1PagoTxt').innerText = pctPago1 + '% extra';
-    document.getElementById('pdfTotal').innerText = '$ ' + totalVal;
     document.getElementById('pdfMateriasDesc').innerText = materiasTxt;
 
     if (tieneConvenio) {
