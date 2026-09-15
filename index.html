@@ -321,6 +321,23 @@
       <div class="preview-header">Vista Previa WhatsApp / Kommo</div>
       <pre id="previewText"></pre>
     </div>
+
+    <div class="section-label" style="margin-top: 16px;">5. Mensaje Opcional • Beneficios Extra (enviar aparte, no siempre)</div>
+    <div class="preview-box">
+      <div class="preview-header">Vista Previa • Bloque de Beneficios Extra</div>
+      <pre id="previewBeneficios">Al inscribirte podés sumar descuentos extra si cumplís con alguna de estas opciones:
+
+🔸 Trabajás (vos o familiar directo) en una *Organización Amiga*
+🔸 Sos monotributista (vos o familiar directo)
+🔸 Te refiere alguien que ya *estudia en Siglo 21*
+🔸 *Tenés OSDE* como obra social
+🔸 Practicás deporte de forma *federada*
+
+🙌🏼 ¡Son beneficios que podés aprovechar para reducir aún más el costo!</pre>
+      <button class="btn btn-green" id="btnCopyBeneficios" onclick="copiarBeneficios()" style="margin-top: 12px; width: 100%;">
+        📋 COPIAR BLOQUE DE BENEFICIOS EXTRA
+      </button>
+    </div>
   </div>
 
   <!-- HOJA PDF OFICIAL -->
@@ -622,6 +639,19 @@ ${cuotasMsg}
       btn.style.background = '#059669';
       setTimeout(() => {
         btn.innerText = '📋 COPIAR MENSAJE PARA KOMMO';
+        btn.style.background = '#10b981';
+      }, 2200);
+    });
+  }
+
+  function copiarBeneficios() {
+    const txt = document.getElementById('previewBeneficios').innerText;
+    const btn = document.getElementById('btnCopyBeneficios');
+    navigator.clipboard.writeText(txt).then(() => {
+      btn.innerText = '✅ ¡COPIADO AL PORTAPAPELES!';
+      btn.style.background = '#059669';
+      setTimeout(() => {
+        btn.innerText = '📋 COPIAR BLOQUE DE BENEFICIOS EXTRA';
         btn.style.background = '#10b981';
       }, 2200);
     });
