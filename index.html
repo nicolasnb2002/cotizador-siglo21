@@ -535,7 +535,6 @@
     if (!es2B) {
       cuotasMsg = `💳 *OPCIÓN FINANCIADA (Visa / Master bancarizada)*
 👉 *6 cuotas fijas de: $${cuota6Val}*
-• O bien en 3 cuotas fijas de: *$${cuota3Val}*
 _(Ya incluye promo ${pctMatr}% OFF${descConvenioTxt})_`;
     } else {
       cuotasMsg = `💳 *OPCIÓN FINANCIADA (Visa / Master bancarizada)*
@@ -595,8 +594,7 @@ ${cuotasMsg}
     if (!es2B) {
       document.getElementById('pdfPrice1Label').innerText = '6 CUOTAS FIJAS DE';
       document.getElementById('pdfPrice1Val').innerText = '$ ' + cuota6Val;
-      document.getElementById('pdfPrice2Alt').style.display = 'block';
-      document.getElementById('pdfPrice2Alt').innerHTML = `O bien en 3 cuotas fijas de: <strong>$ ${cuota3Val}</strong>`;
+      document.getElementById('pdfPrice2Alt').style.display = 'none';
     } else {
       document.getElementById('pdfPrice1Label').innerText = '3 CUOTAS FIJAS DE';
       document.getElementById('pdfPrice1Val').innerText = '$ ' + cuota3Val;
